@@ -86,13 +86,15 @@ jobs:
           echo "CURSE_FILENAME: $CURSE_FILENAME"
           echo "CURSE_FILEID: $CURSE_FILEID"
           echo "The following steps should be 'skipped' if 'MY_FILENAME' == 'CURSE_FILENAME'"
-    
+
+      # this one is differene than other versions of this repo because there's a space in the filename 
       - name: Download Newer Version from Curse
         id: donwload-newer-version
         if: ${{ env.MY_FILENAME != env.CURSE_FILENAME }}
         run: |
           echo "New version detected! $CURSE_FILENAME"
-          curl -O https://mediafilez.forgecdn.net/files/${CURSE_FILEID:0:4}/${CURSE_FILEID:4:3}/${CURSE_FILENAME}.zip
+          curl https://mediafilez.forgecdn.net/files/${CURSE_FILEID:0:4}/${CURSE_FILEID:4:3}/${CURSE_FILENAME}.zip \
+            -o AtlasLootClassic_SOD.zip
           ls
       
       - name: Unzip Addon Package
