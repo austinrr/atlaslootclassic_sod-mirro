@@ -60,7 +60,7 @@ jobs:
             'https://www.curseforge.com/api/v1/mods/947242/files?pageIndex=0&pageSize=10&sort=dateCreated&sortDescending=true&removeAlphas=true' \
             -o curse-response.json
           fileNameRaw=$(cat curse-response.json | jq -r '.data[0].fileName')
-          fileNameFixed=${fileNameRaw%.*} | sed 's/ /%20/g'
+          fileNameFixed=${fileNameRaw%.*}
           echo "latest_curse_fileid=$(cat curse-response.json | jq -r '.data[0].id')" >> "$GITHUB_OUTPUT"
           echo "latest_curse_filename=${fileNameFixed}" >> "$GITHUB_OUTPUT"
           echo "latest_curse_filename_nospace=$(echo ${fileNameFixed} | sed 's/ /_/g')" >> "$GITHUB_OUTPUT"
