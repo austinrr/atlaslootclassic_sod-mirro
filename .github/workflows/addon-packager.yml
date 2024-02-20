@@ -30,6 +30,7 @@ jobs:
     outputs:
       MY_FILENAME: ${{ steps.set-envvar-prev-release.outputs.prev-release-filename }}
       CURSE_FILENAME: ${{ steps.curl-curseforge.outputs.latest_curse_filename }}
+      CURSE_FILENAME_FIXED: ${{ steps.curl-curseforge.outputs.latest_curse_filename_nospace }}
       CURSE_FILEID: ${{ steps.curl-curseforge.outputs.latest_curse_fileid }}
         
     steps:
@@ -59,9 +60,10 @@ jobs:
             'https://www.curseforge.com/api/v1/mods/947242/files?pageIndex=0&pageSize=10&sort=dateCreated&sortDescending=true&removeAlphas=true' \
             -o curse-response.json
           fileNameRaw=$(cat curse-response.json | jq -r '.data[0].fileName')
-          fileNameFixed=${fileNameRaw%.*}
+          fileNameFixed=${fileNameRaw%.*} | sed 's/ /%20/g'
           echo "latest_curse_fileid=$(cat curse-response.json | jq -r '.data[0].id')" >> "$GITHUB_OUTPUT"
           echo "latest_curse_filename=${fileNameFixed}" >> "$GITHUB_OUTPUT"
+          echo "latest_curse_filename_nospace=$(echo "${fileNameFixed}" | sed 's/ /_/g') >> "$GITHUB_OUTPUT"
 
   # Download Job
   download-newer-version:
@@ -74,6 +76,7 @@ jobs:
     env:
       MY_FILENAME: ${{ needs.collect-version-information.outputs.MY_FILENAME }}
       CURSE_FILENAME: ${{ needs.collect-version-information.outputs.CURSE_FILENAME }}
+      CURSE_FILENAME_FIXED: ${{ needs.collect-version-information.outputs.CURSE_FILENAME_FIXED }}
       CURSE_FILEID: ${{ needs.collect-version-information.outputs.CURSE_FILEID }}
       
     steps:
@@ -94,12 +97,13 @@ jobs:
         run: |
           echo "New version detected! $CURSE_FILENAME"
           ENCODED="$(echo $CURSE_FILENAME | sed 's/ /%20/g')"
-          curl -O https://mediafilez.forgecdn.net/files/${CURSE_FILEID:0:4}/${CURSE_FILEID:4:3}/${ENCODED}.zip
+          curl https://mediafilez.forgecdn.net/files/${CURSE_FILEID:0:4}/${CURSE_FILEID:4:3}/${ENCODED}.zip \
+            -o ${CURSE_FILENAME_FIXED}.zip
       
       - name: Unzip Addon Package
         id: unzip_addon_pkg
         if: ${{ env.MY_FILENAME != env.CURSE_FILENAME }}
-        run: unzip ${CURSE_FILENAME}.zip
+        run: unzip ${CURSE_FILENAME_FIXED}.zip
 
       - name: Get Interface Version Number
         id: get_interface_version_num
@@ -113,7 +117,7 @@ jobs:
         env:
           NEW_INTERFACE: ${{ steps.get_interface_version_num.outputs.get_interface_version_num }}
         run: |
-          FULLFILE_NAME="${CURSE_FILENAME}.zip"
+          FULLFILE_NAME="${CURSE_FILENAME_FIXED}.zip"
           temp="$(\
             jq --arg FILENAME "$FULLFILE_NAME" --argjson INTERFACE "$NEW_INTERFACE" \
             '.releases[0].filename |= $FILENAME | .releases[0].metadata[0].interface |= $INTERFACE' release.json)" \
@@ -130,7 +134,7 @@ jobs:
         if: ${{ env.MY_FILENAME != env.CURSE_FILENAME }}
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "${{ env.CURSE_FILENAME }}.zip,release.json"
+          artifacts: "${{ env.CURSE_FILENAME_FIXED }}.zip,release.json"
           tag: ${{ steps.make-tag.outputs.tag }}
           latest: true
           
