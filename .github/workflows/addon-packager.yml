@@ -63,7 +63,7 @@ jobs:
           fileNameFixed=${fileNameRaw%.*} | sed 's/ /%20/g'
           echo "latest_curse_fileid=$(cat curse-response.json | jq -r '.data[0].id')" >> "$GITHUB_OUTPUT"
           echo "latest_curse_filename=${fileNameFixed}" >> "$GITHUB_OUTPUT"
-          echo "latest_curse_filename_nospace=$(echo ${fileNameFixed} | sed 's/ /_/g') >> "$GITHUB_OUTPUT"
+          echo "latest_curse_filename_nospace=$(echo ${fileNameFixed} | sed 's/ /_/g')" >> "$GITHUB_OUTPUT"
 
   # Download Job
   download-newer-version:
