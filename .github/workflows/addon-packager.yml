@@ -93,7 +93,8 @@ jobs:
         if: ${{ env.MY_FILENAME != env.CURSE_FILENAME }}
         run: |
           echo "New version detected! $CURSE_FILENAME"
-          curl https://mediafilez.forgecdn.net/files/${CURSE_FILEID:0:4}/${CURSE_FILEID:4:3}/${CURSE_FILENAME}.zip \
+          ENCODED="$(echo $CURSE_FILENAME | sed 's/ /%20/g')"
+          curl https://mediafilez.forgecdn.net/files/${CURSE_FILEID:0:4}/${CURSE_FILEID:4:3}/${ENCODED}.zip \
             -o AtlasLootClassic_SoD.zip
       
       - name: Unzip Addon Package
