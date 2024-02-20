@@ -94,13 +94,12 @@ jobs:
         run: |
           echo "New version detected! $CURSE_FILENAME"
           ENCODED="$(echo $CURSE_FILENAME | sed 's/ /%20/g')"
-          curl https://mediafilez.forgecdn.net/files/${CURSE_FILEID:0:4}/${CURSE_FILEID:4:3}/${ENCODED}.zip \
-            -o AtlasLootClassic_SoD.zip
+          curl -O https://mediafilez.forgecdn.net/files/${CURSE_FILEID:0:4}/${CURSE_FILEID:4:3}/${ENCODED}.zip
       
       - name: Unzip Addon Package
         id: unzip_addon_pkg
         if: ${{ env.MY_FILENAME != env.CURSE_FILENAME }}
-        run: unzip AtlasLootClassic_SoD.zip
+        run: unzip ${CURSE_FILENAME}.zip
 
       - name: Get Interface Version Number
         id: get_interface_version_num
