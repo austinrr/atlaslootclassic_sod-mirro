@@ -94,8 +94,7 @@ jobs:
         run: |
           echo "New version detected! $CURSE_FILENAME"
           curl https://mediafilez.forgecdn.net/files/${CURSE_FILEID:0:4}/${CURSE_FILEID:4:3}/${CURSE_FILENAME}.zip \
-            -o AtlasLootClassic_SOD.zip
-          ls
+            -o AtlasLootClassic_SoD.zip
       
       - name: Unzip Addon Package
         id: unzip_addon_pkg
