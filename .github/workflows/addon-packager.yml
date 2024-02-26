@@ -87,13 +87,14 @@ jobs:
         run: |
           echo "MY_FILENAME: $MY_FILENAME"
           echo "CURSE_FILENAME: $CURSE_FILENAME"
+          echo "CURSE_FILENAME_FIXED: $CURSE_FILENAME_FIXED"
           echo "CURSE_FILEID: $CURSE_FILEID"
           echo "The following steps should be 'skipped' if 'MY_FILENAME' == 'CURSE_FILENAME'"
 
       # this one is differene than other versions of this repo because there's a space in the filename 
       - name: Download Newer Version from Curse
         id: donwload-newer-version
-        if: ${{ env.MY_FILENAME != env.CURSE_FILENAME }}
+        if: ${{ env.MY_FILENAME != env.CURSE_FILENAME_FIXED }}
         run: |
           echo "New version detected! $CURSE_FILENAME"
           ENCODED="$(echo $CURSE_FILENAME | sed 's/ /%20/g')"
@@ -102,18 +103,18 @@ jobs:
       
       - name: Unzip Addon Package
         id: unzip_addon_pkg
-        if: ${{ env.MY_FILENAME != env.CURSE_FILENAME }}
+        if: ${{ env.MY_FILENAME != env.CURSE_FILENAME_FIXED }}
         run: unzip ${CURSE_FILENAME_FIXED}.zip
 
       - name: Get Interface Version Number
         id: get_interface_version_num
-        if: ${{ env.MY_FILENAME != env.CURSE_FILENAME }}
+        if: ${{ env.MY_FILENAME != env.CURSE_FILENAME_FIXED }}
         run: |
           cd AtlasLootClassic/
           echo "get_interface_version_num=$(cat AtlasLootClassic_Vanilla.toc | sed -n -E -e 's/^## Interface: ([0-9]+).*/\1/p')" >> "$GITHUB_OUTPUT"
 
       - name: Update release.json
-        if: ${{ env.MY_FILENAME != env.CURSE_FILENAME }}
+        if: ${{ env.MY_FILENAME != env.CURSE_FILENAME_FIXED }}
         env:
           NEW_INTERFACE: ${{ steps.get_interface_version_num.outputs.get_interface_version_num }}
         run: |
@@ -124,14 +125,14 @@ jobs:
             && echo "${temp}" > release.json
 
       - name: Make Tag
-        if: ${{ env.MY_FILENAME != env.CURSE_FILENAME }}
+        if: ${{ env.MY_FILENAME != env.CURSE_FILENAME_FIXED }}
         id: make-tag
         run: |
           version=$(echo $CURSE_FILENAME | sed -ne 's/[^v]\+\(v[0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p')
           echo "tag=${version}" >> "$GITHUB_OUTPUT"
         
       - name: Make Release
-        if: ${{ env.MY_FILENAME != env.CURSE_FILENAME }}
+        if: ${{ env.MY_FILENAME != env.CURSE_FILENAME_FIXED }}
         uses: ncipollo/release-action@v1
         with:
           artifacts: "${{ env.CURSE_FILENAME_FIXED }}.zip,release.json"
