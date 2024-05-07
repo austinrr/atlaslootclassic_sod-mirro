@@ -98,8 +98,10 @@ jobs:
         run: |
           echo "New version detected! $CURSE_FILENAME"
           ENCODED="$(echo $CURSE_FILENAME | sed 's/ /%20/g')"
-          curl https://mediafilez.forgecdn.net/files/${CURSE_FILEID:0:4}/${CURSE_FILEID:4:3}/${ENCODED}.zip \
-            -o ${CURSE_FILENAME_FIXED}.zip
+          tmp=${CURSE_FILEID:4:3}
+          echo https://mediafilez.forgecdn.net/files/${CURSE_FILEID:0:4}/${tmp#${tmp%%[!0]*}}/${ENCODED}.zip
+          # trim the leading 0s from the substring using ${tmp#${tmp%%[!0]*}}
+          curl -O https://mediafilez.forgecdn.net/files/${CURSE_FILEID:0:4}/${CURSE_FILEID:4:3}/${ENCODED}.zip
       
       - name: Unzip Addon Package
         id: unzip_addon_pkg
